@@ -10,9 +10,21 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ "*" ]
+    branches:
+      - master
+      - develop
+      - 'feature/*'
+      - 'hotfix/*'
+      - 'bugfix/*'
+      - 'release/*'
   pull_request:
-    branches: [ "*" ]
+    branches:
+      - master
+      - develop
+      - 'feature/*'
+      - 'hotfix/*'
+      - 'bugfix/*'
+      - 'release/*'
 
 jobs:
   build:
@@ -29,9 +41,31 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: Update dependency graph
       uses: advanced-security/maven-dependency-submission-action@v4.1.1
+
+    - name: Set Version Dynamically
+      id: set-version
+      run: |
+        VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout | sed 's/-SNAPSHOT//')
+        if [[ "${{ github.ref }}" == refs/heads/release/* ]]; then
+          VERSION="$VERSION"
+        elif [[ "${{ github.ref }}" == refs/heads/feature/* ]]; then
+          VERSION="$VERSION-FB-$(date +%Y%m%d.%H%M%S)-${{ github.run_number }}"
+        elif [[ "${{ github.ref }}" == refs/heads/bugfix/* ]]; then
+          VERSION="$VERSION-FB-$(date +%Y%m%d.%H%M%S)-${{ github.run_number }}"
+        elif [[ "${{ github.ref }}" == refs/heads/hotfix/* ]]; then
+          VERSION="$VERSION-HOTFIX-${{ github.run_number }}"
+        else
+          VERSION="$VERSION-$(date +%Y%m%d.%H%M%S)-${{ github.run_number }}"
+        fi
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+    - name: Publish Package
+      run: |
+        env
+        mvn help:evaluate -Dexpression=project.version -q -DforceStdout | sed 's/-SNAPSHOT//'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
