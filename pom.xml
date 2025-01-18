@@ -14,4 +14,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>khannz</name>
+            <url>https://maven.pkg.github.com/khannz/test-mrk-gha</url>
+        </repository>
+    </distributionManagement>
+
 </project>
