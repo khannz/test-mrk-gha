@@ -1,0 +1,20 @@
+name: "⚙️ Build"
+on:
+  workflow_call:
+    outputs:
+      version:
+        description: Version string that was built
+        value: ${{ jobs.build.outputs.version }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.set-version.outputs.version }}
+    steps:
+      - id: set-version
+        run: |
+          echo "version=1.2.3-b1" >> $GITHUB_OUTPUT
+      - name: Run build task
+        run: |
+          echo "Build completed"

@@ -1,0 +1,16 @@
+name: Caller
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yaml
+  deploy:
+    strategy:
+      matrix:
+        environment: [dev, test, prod]
+    uses: ./.github/workflows/deploy.yaml
+    needs: [ 'build' ]
+    with:
+      environment: ${{ matrix.environment }}
+      version: ${{ needs.build.outputs.version }}
